@@ -2,7 +2,7 @@ import { useState } from "react";
 import axios from "axios";
 import {useNavigate} from 'react-router-dom'
 
-const BASE_URL = process.env.REACT_APP_BASE_URL;
+import BASE_URL from "../baseUrl";
 export default function RegisterPage() {
     const navigate=useNavigate();
   const [email, setEmail] = useState("");
@@ -14,7 +14,7 @@ export default function RegisterPage() {
 
   const handleSendOTP = async () => {
     try {
-      const res = await axios.post(`{BASE_URL}/email-request/`, { email });
+      const res = await axios.post(`${BASE_URL}/email-request/`, { email });
       setMessage(res.data.message);
       
     } catch (err) {
@@ -30,7 +30,7 @@ export default function RegisterPage() {
       formData.append("password", password);
       if (profileImage) formData.append("profile_image", profileImage);
   
-      const res = await axios.post(`{BASE_URL}/register/`, formData);
+      const res = await axios.post(`${BASE_URL}/register/`, formData);
       setMessage(res.data.message);
       navigate('/login') 
     } catch (err) {

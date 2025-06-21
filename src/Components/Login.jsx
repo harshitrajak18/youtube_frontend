@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 
-const BASE_URL = process.env.REACT_APP_BASE_URL;
+import BASE_URL from '../baseUrl';
 
 function Login() {
   const [email, setEmail] = useState('');
@@ -14,7 +14,7 @@ function Login() {
     e.preventDefault();
 
     try {
-      const response = await axios.post(`{BASE_URL/login/`, {
+      const response = await axios.post(`${BASE_URL}/login/`, {
         email,
         password,
       });

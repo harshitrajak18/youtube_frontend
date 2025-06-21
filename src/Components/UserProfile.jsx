@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from 'react-router-dom';
-const BASE_URL = process.env.REACT_APP_BASE_URL;
+
+import BASE_URL from "../baseUrl";
 export default function UserProfile({ email }) {
   const [user, setUser] = useState(null);
   const [videos, setVideos] = useState([]);
@@ -20,7 +21,7 @@ export default function UserProfile({ email }) {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await axios.get(`{BASE_URL}/user-profile/${email}/`, {
+        const res = await axios.get(`${BASE_URL}/user-profile/${email}/`, {
           headers: {
             Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
           },
@@ -48,7 +49,7 @@ export default function UserProfile({ email }) {
     data.append("thumbnail", formData.thumbnail);
   
     try {
-      const response = await axios.post(`{BASE_URL}/upload-video/${email}/`, data, {
+      const response = await axios.post(`${BASE_URL}/upload-video/${email}/`, data, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           "Content-Type": "multipart/form-data"

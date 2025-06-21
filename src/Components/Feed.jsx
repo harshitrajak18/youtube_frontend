@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import VideoDetail from "./VideoDetails";
 import { useNavigate, useNavigation } from "react-router-dom";
-const BASE_URL = process.env.REACT_APP_BASE_URL;
+import BASE_URL from "../baseUrl";
 
 export default function Feed() {
   const navigate=useNavigate();
@@ -12,7 +12,7 @@ export default function Feed() {
   useEffect(() => {
     const fetchVideos = async () => {
       try {
-        const res = await axios.get(`{BASE_URL}/feed/`);
+        const res = await axios.get(`${BASE_URL}/feed/`);
         setVideos(res.data.videos);
       } catch (err) {
         console.error("Failed to fetch videos", err);

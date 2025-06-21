@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-
+import BASE_URL from "../baseUrl";
 export default function VideoDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -16,7 +16,7 @@ export default function VideoDetail() {
   useEffect(() => {
     const fetchVideo = async () => {
       try {
-        const res = await axios.get(`{BASE_URL}/videos/${id}/`, {
+        const res = await axios.get(`${BASE_URL}/videos/${id}/`, {
           headers: {
             Authorization: token ? `Bearer ${token}` : undefined,
           },
@@ -35,7 +35,7 @@ export default function VideoDetail() {
   useEffect(() => {
     const fetchComments = async () => {
       try {
-        const res = await axios.get(`{BASE_URL}/videos/${id}/comments/`);
+        const res = await axios.get(`${BASE_URL}/videos/${id}/comments/`);
         setComments(res.data.comments || []);
       } catch (err) {
         console.error("Failed to fetch comments", err);
@@ -55,7 +55,7 @@ export default function VideoDetail() {
 
     try {
       const res = await axios.post(
-        `{BASE_URL}/videos/${id}/like-toggle/`,
+        `${BASE_URL}/videos/${id}/like-toggle/`,
         {},
         {
           headers: {
@@ -90,7 +90,7 @@ export default function VideoDetail() {
 
     try {
       const res = await axios.post(
-        `{BASE_URL}/videos/${id}/comments/`,
+        `${BASE_URL}/videos/${id}/comments/`,
         { text: newComment },
         {
           headers: {
