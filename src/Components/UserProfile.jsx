@@ -1,15 +1,15 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useNavigate } from 'react-router-dom';
+import { useNavigate } from "react-router-dom";
+import { BASE_URL, LOCAL_HOST } from "../baseUrl";
 
-import BASE_URL from "../baseUrl";
 export default function UserProfile({ email }) {
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [videos, setVideos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
-  const [uploading, setUploading] = useState(false); // NEW STATE
-  const navigate = useNavigate()
+  const [uploading, setUploading] = useState(false);
 
   const [formData, setFormData] = useState({
     title: "",
@@ -23,14 +23,14 @@ export default function UserProfile({ email }) {
       try {
         const res = await axios.get(`${BASE_URL}/user-profile/${email}/`, {
           headers: {
-            Authorization: `Bearer ${localStorage.getItem('accessToken')}`,
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
           },
         });
         setUser(res.data.user);
         setVideos(res.data.videos);
-        setLoading(false);
       } catch (err) {
         console.error("Failed to load user profile", err);
+      } finally {
         setLoading(false);
       }
     };
@@ -41,100 +41,127 @@ export default function UserProfile({ email }) {
   const toggleModal = () => setShowModal(!showModal);
 
   const uploadVideo = async () => {
-    setUploading(true); // START LOADING
+    setUploading(true);
     const data = new FormData();
     data.append("title", formData.title);
     data.append("description", formData.description);
     data.append("video_file", formData.video_file);
     data.append("thumbnail", formData.thumbnail);
-  
+
     try {
-      const response = await axios.post(`${BASE_URL}/upload-video/${email}/`, data, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
-          "Content-Type": "multipart/form-data"
+      const response = await axios.post(
+        `${BASE_URL}/upload-video/${email}/`,
+        data,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("accessToken")}`,
+            "Content-Type": "multipart/form-data",
+          },
         }
-      });
-  
+      );
       alert("Upload successful");
       toggleModal();
-      setFormData({ title: "", description: "", video_file: null, thumbnail: null });
+      setFormData({
+        title: "",
+        description: "",
+        video_file: null,
+        thumbnail: null,
+      });
       setVideos((prev) => [...prev, response.data]);
     } catch (err) {
       alert("Upload failed");
       console.error(err);
     } finally {
-      setUploading(false); // END LOADING
+      setUploading(false);
     }
   };
-  
 
   if (loading) {
-    return <div className="text-center text-lg mt-10 text-gray-700">Loading...</div>;
+    return (
+      <div className="text-center text-lg mt-10 text-rose-600">Loading...</div>
+    );
   }
-
   if (!user) {
-    return <div className="text-center text-red-600 mt-10">User not found</div>;
+    return (
+      <div className="text-center text-red-600 mt-10">User not found</div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-purple-100 p-8">
-        
-      {/* LOADING OVERLAY */}
+    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-rose-50 to-purple-100 p-6 sm:p-10">
+      {/* Uploading Loader */}
       {uploading && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
-          <div className="bg-white p-6 rounded-xl shadow-xl flex flex-col items-center gap-2">
-            <svg className="animate-spin h-10 w-10 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8H4z" />
-            </svg>
-            <p className="text-blue-700 font-medium">Uploading...</p>
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-40 flex justify-center items-center">
+          <div className="bg-white p-6 rounded-xl shadow-lg text-center">
+            <div className="animate-spin h-8 w-8 border-t-2 border-rose-500 rounded-full mx-auto mb-4"></div>
+            <p className="text-rose-600 font-semibold">Uploading...</p>
           </div>
         </div>
       )}
 
-      <div className="max-w-5xl mx-auto bg-white shadow-xl rounded-2xl p-6">
-        {/* Profile Section */}
-        <div className="flex items-center gap-6 border-b pb-6">
+      <div className="max-w-6xl mx-auto bg-white/30 backdrop-blur-lg rounded-2xl p-6 sm:p-10 shadow-lg border border-rose-200">
+        {/* Header */}
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-6 border-b pb-6 border-rose-300">
           <img
             src={user.profile_photo}
             alt="Profile"
-            className="w-24 h-24 rounded-full object-cover border-2 border-purple-500"
+            className="w-24 h-24 rounded-full border-4 border-rose-500 shadow-md object-cover"
           />
-          <div>
-            <h2 className="text-2xl font-bold text-gray-800">{user.username}</h2>
-            <p className="text-gray-600">{user.email}</p>
-            <p className="text-sm text-gray-500">{user.first_name} {user.last_name}</p>
+          <div className="flex-1">
+            <h2 className="text-2xl font-bold text-rose-800">
+              {user.username}
+            </h2>
+            <p className="text-rose-600">{user.email}</p>
+            <p className="text-sm text-rose-500">
+              {user.first_name} {user.last_name}
+            </p>
           </div>
-          <button
-            onClick={toggleModal}
-            className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-xl ml-auto"
-          >
-            Upload new Video
-          </button>
-          <button 
-          onClick={()=>navigate('/feed')}
-          className="bg-red-400 hover:bg-red-700 text-white fond-bold py-2 px-4 rounded-xl ml-auto">
-            Feed
-          </button>
+          <div className="flex gap-3">
+            <button
+              onClick={toggleModal}
+              className="bg-rose-600 hover:bg-rose-700 text-white px-4 py-2 rounded-lg shadow transition"
+            >
+              + Upload Video
+            </button>
+            <button
+              onClick={() => navigate("/feed")}
+              className="bg-purple-200 hover:bg-purple-300 text-purple-800 px-4 py-2 rounded-lg transition"
+            >
+              View Feed
+            </button>
+          </div>
         </div>
 
-        {/* Videos Section */}
-        <div className="mt-6">
-          <h3 className="text-xl font-semibold mb-4 text-purple-700">Uploaded Videos</h3>
+        {/* Videos */}
+        <div className="mt-8">
+          <h3 className="text-xl font-semibold text-rose-700 mb-4">
+            Your Videos
+          </h3>
           {videos.length === 0 ? (
-            <p className="text-gray-600">No videos uploaded yet.</p>
+            <p className="text-rose-600">
+              You haven't uploaded any videos yet.
+            </p>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {videos.map((video, index) => (
-                <div key={index} className="bg-gray-50 rounded-xl shadow p-1">
-                  <h4 className="text-lg font-semibold text-gray-800 mb-1">{video.title}</h4>
-                  <p className="text-gray-600 mb-2">{video.description}</p>
-                  <video controls className="w-half h-48 rounded shadow mb-2">
-                    <source src={video.video_url} type="video/mp4" />
-                    Your browser does not support the video tag.
-                  </video>
-                  <p className="text-xs text-gray-500">Uploaded on: {video.uploaded_at}</p>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {videos.map((video, idx) => (
+                <div
+                  key={idx}
+                  className="bg-white rounded-lg shadow-md p-4 border border-rose-100"
+                >
+                  <h4 className="text-md font-semibold text-rose-800 mb-1">
+                    {video.title}
+                  </h4>
+                  <p className="text-sm text-rose-600 mb-2">
+                    {video.description}
+                  </p>
+                  <video
+                    controls
+                    className="w-full h-48 object-cover rounded mb-2 ring-1 ring-rose-200"
+                    src={video.video_url}
+                  />
+                  <p className="text-xs text-rose-500">
+                    Uploaded: {new Date(video.uploaded_at).toLocaleDateString()}
+                  </p>
                 </div>
               ))}
             </div>
@@ -144,47 +171,61 @@ export default function UserProfile({ email }) {
 
       {/* Upload Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white p-6 rounded-lg w-[90%] max-w-md shadow-lg relative">
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl p-6 w-full max-w-md shadow-lg border border-rose-200">
             <button
-              className="absolute top-2 right-2 text-gray-500 hover:text-red-600 text-xl"
               onClick={toggleModal}
+              className="absolute top-4 right-4 text-rose-500 hover:text-rose-700 text-2xl"
             >
               &times;
             </button>
-            <h2 className="text-xl font-semibold mb-4 text-center">Upload Video</h2>
+            <h2 className="text-lg font-semibold mb-4 text-rose-800 text-center">
+              Upload New Video
+            </h2>
             <input
               type="text"
               placeholder="Title"
-              className="w-full mb-3 p-2 border rounded"
+              className="w-full p-2 mb-3 border rounded-lg focus:ring-rose-500 focus:border-rose-500"
               value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, title: e.target.value })
+              }
             />
             <textarea
               placeholder="Description"
-              className="w-full mb-3 p-2 border rounded"
+              className="w-full p-2 mb-3 border rounded-lg focus:ring-rose-500 focus:border-rose-500"
               value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, description: e.target.value })
+              }
             />
-            <label className="block mb-2">Video File:</label>
+            <label className="block text-sm font-medium mb-1 text-rose-700">
+              Video File
+            </label>
             <input
               type="file"
               accept="video/*"
-              onChange={(e) => setFormData({ ...formData, video_file: e.target.files[0] })}
-              className="mb-3"
+              className="mb-3 w-full text-sm text-rose-600"
+              onChange={(e) =>
+                setFormData({ ...formData, video_file: e.target.files[0] })
+              }
             />
-            <label className="block mb-2">Thumbnail:</label>
+            <label className="block text-sm font-medium mb-1 text-rose-700">
+              Thumbnail
+            </label>
             <input
               type="file"
               accept="image/*"
-              onChange={(e) => setFormData({ ...formData, thumbnail: e.target.files[0] })}
-              className="mb-4"
+              className="mb-4 w-full text-sm text-rose-600"
+              onChange={(e) =>
+                setFormData({ ...formData, thumbnail: e.target.files[0] })
+              }
             />
             <button
               onClick={uploadVideo}
-              className="w-full bg-green-600 hover:bg-green-700 text-white py-2 rounded"
+              className="w-full bg-rose-600 hover:bg-rose-700 text-white py-2 rounded-lg shadow transition"
             >
-              Upload
+              Upload Video
             </button>
           </div>
         </div>

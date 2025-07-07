@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import BASE_URL from "../baseUrl";
+import { BASE_URL  } from "../baseUrl";
+
 export default function VideoDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -12,7 +13,6 @@ export default function VideoDetail() {
   const [newComment, setNewComment] = useState("");
   const token = localStorage.getItem("accessToken");
 
-  // Fetch video details
   useEffect(() => {
     const fetchVideo = async () => {
       try {
@@ -31,7 +31,6 @@ export default function VideoDetail() {
     fetchVideo();
   }, [id, token]);
 
-  // Fetch comments
   useEffect(() => {
     const fetchComments = async () => {
       try {
@@ -45,7 +44,6 @@ export default function VideoDetail() {
     fetchComments();
   }, [id]);
 
-  // Toggle Like
   const toggleLike = async () => {
     if (!token) {
       alert("You must be logged in to like a video.");
@@ -78,7 +76,6 @@ export default function VideoDetail() {
     }
   };
 
-  // Submit new comment
   const handleCommentSubmit = async (e) => {
     e.preventDefault();
     if (!token) {
@@ -98,95 +95,83 @@ export default function VideoDetail() {
           },
         }
       );
-      setComments([res.data.comment, ...comments]); // Add new comment to top
+      setComments([res.data.comment, ...comments]);
       setNewComment("");
     } catch (err) {
       console.error("Failed to post comment", err);
     }
   };
 
-  if (loading) return <div className="text-center mt-10">Loading video...</div>;
-  if (!video) return <div className="text-center mt-10">Video not found.</div>;
+  if (loading) return <div className="text-center mt-10 text-white">Loading video...</div>;
+  if (!video) return <div className="text-center mt-10 text-white">Video not found.</div>;
 
   return (
-    <div className="max-w-4xl mx-auto px-4 py-8 text-white">
+    <div className="max-w-3xl mx-auto px-4 py-8 text-white">
       {/* Video Player */}
-      <div className="aspect-w-16 aspect-h-9 bg-black rounded-lg overflow-hidden">
-        <video src={video.video_url} controls className="w-full h-full" />
+      <div className="w-full aspect-video bg-black rounded-lg overflow-hidden shadow-lg">
+        <video
+          src={video.video_url}
+          controls
+          className="w-full h-full rounded-md border border-gray-700"
+        />
       </div>
 
-      <h2 className="text-2xl font-bold mt-4">{video.title}</h2>
-      <p className="text-sm text-gray-400">
-        Uploaded by {video.uploaded_by.username} on{" "}
-        {new Date(video.uploaded_at).toLocaleDateString()}
-      </p>
+      {/* Title and Meta */}
+      <div className="mt-4 space-y-1">
+        <h2 className="text-2xl font-bold">{video.title}</h2>
+        <p className="text-sm text-gray-400">
+          Uploaded by <span className="text-blue-400">{video.uploaded_by.username}</span> on{" "}
+          {new Date(video.uploaded_at).toLocaleDateString()}
+        </p>
+      </div>
 
-      <p className="mt-2 text-gray-300">{video.description}</p>
+      <p className="mt-3 text-gray-300">{video.description}</p>
 
       {/* Like Button */}
-      <div className="mt-4">
+      <div className="mt-5 flex items-center">
         <button
           onClick={toggleLike}
-          className={`group flex items-center gap-2 px-4 py-2 rounded-full transition-all duration-300 focus:outline-none
+          className={`flex items-center gap-2 px-5 py-2 rounded-full font-semibold transition 
             ${video.liked ? "bg-red-600 hover:bg-red-700" : "bg-gray-700 hover:bg-gray-600"}`}
         >
-          <div className="w-5 h-5">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-full w-full transition-all duration-300"
-              fill={video.liked ? "white" : "none"}
-              viewBox="0 0 24 24"
-              stroke="white"
-              strokeWidth="2"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M5.121 19.071l6.879-6.879 6.879 6.879M12 3v15"
-              />
-            </svg>
-          </div>
-          <span className="text-white font-medium transition-all duration-200 group-hover:scale-105">
-            {video.liked ? "Liked" : "Like"} ({video.likes})
-          </span>
+          <span className="text-white">{video.liked ? "❤️ Liked" : "🤍 Like"}</span>
+          <span className="text-white">({video.likes})</span>
         </button>
       </div>
 
-      {/* Comments Section */}
-      <div className="mt-8">
-        <h3 className="text-xl font-semibold mb-2">Comments</h3>
+      {/* Comments */}
+      <div className="mt-10">
+        <h3 className="text-xl font-semibold mb-3">Comments</h3>
 
-        {/* Add Comment Form */}
         {token && (
-          <form onSubmit={handleCommentSubmit} className="mb-4">
+          <form onSubmit={handleCommentSubmit} className="mb-6">
             <textarea
-              className="w-full p-2 rounded bg-gray-800 text-white"
+              className="w-full p-3 rounded bg-gray-800 border border-gray-600 focus:outline-none"
               rows="3"
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
-              placeholder="Add a comment..."
+              placeholder="Write your comment..."
             />
             <button
               type="submit"
-              className="mt-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded text-white"
+              className="mt-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded shadow"
             >
               Post Comment
             </button>
           </form>
         )}
 
-        {/* List of Comments */}
         <div className="space-y-4">
           {Array.isArray(comments) && comments.length > 0 ? (
             comments.map((comment, index) => (
-              <div key={index} className="bg-gray-800 p-3 rounded">
-                <p className="font-semibold">{comment.user}</p>
-                <p>{comment.text}</p>
-                <p className="text-sm text-gray-400">{comment.created_at}</p>
+              <div key={index} className="bg-gray-800 p-4 rounded shadow">
+                <p className="font-semibold text-blue-300">{comment.user}</p>
+                <p className="text-white mt-1">{comment.text}</p>
+                <p className="text-sm text-gray-500 mt-1">{comment.created_at}</p>
               </div>
             ))
           ) : (
-            <p className="text-gray-400">No comments yet.</p>
+            <p className="text-gray-500">No comments yet. Be the first to add one!</p>
           )}
         </div>
       </div>
